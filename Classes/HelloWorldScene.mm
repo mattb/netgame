@@ -46,6 +46,8 @@ enum {
 -(id) init
 {
 	if( (self=[super init])) {
+		webSocket = [[ZTWebSocket alloc] initWithURLString:@"ws://www.hackdiary.com:9990/" delegate:self];
+		[webSocket open];
 		
 		// enable touches
 		self.isTouchEnabled = YES;
@@ -215,6 +217,7 @@ enum {
 	//Add a new body/atlas sprite at the touched location
 	for( UITouch *touch in touches ) {
 		CGPoint location = [touch locationInView: [touch view]];
+		[webSocket send:[NSString stringWithFormat:@"%d %d", (int)location.x,(int)location.y]];
 		
 		location = [[CCDirector sharedDirector] convertToGL: location];
 		
@@ -241,6 +244,39 @@ enum {
 	
 	world->SetGravity( gravity );
 }
+
+-(void)webSocketDidOpen:(ZTWebSocket *)aWebSocket {
+	NSLog(@"Connected");
+	[aWebSocket send:@"O HAI"];
+}
+-(void)webSocketDidClose:(ZTWebSocket *)aWebSocket {
+    NSLog(@"Closed");
+}
+-(void)webSocketDidSendMessage:(ZTWebSocket *)webSocket {
+    NSLog(@"Sent");
+}
+-(void)webSocket:(ZTWebSocket *)webSocket didReceiveMessage:(NSString*)message {
+    NSLog(@"%@", message);
+	NSArray *coords = [message componentsSeparatedByString:@" "];
+	
+	long x = [[coords objectAtIndex:0] longLongValue];
+	long y = [[coords objectAtIndex:1] longLongValue];
+	CGPoint location = CGPointMake(x,y);
+	
+	location = [[CCDirector sharedDirector] convertToGL: location];
+	
+	[self addNewSpriteWithCoords: location];
+}
+
+-(void)webSocket:(ZTWebSocket *)webSocket didFailWithError:(NSError *)error {
+    if (error.code == ZTWebSocketErrorConnectionFailed) {
+        NSLog(@"Connection failed");
+    } else if (error.code == ZTWebSocketErrorHandshakeFailed) {
+        NSLog(@"Handshake failed");
+    } else {
+        NSLog(@"Error");
+    }
+}	
 
 // on "dealloc" you need to release all your retained objects
 - (void) dealloc

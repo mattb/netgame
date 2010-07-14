@@ -6,6 +6,7 @@
 //  Copyright __MyCompanyName__ 2010. All rights reserved.
 //
 
+#import "Zimt/ZTWebSocket.h"
 
 // When you import this file, you import all the cocos2d classes
 #import "cocos2d.h"
@@ -13,8 +14,9 @@
 #import "GLES-Render.h"
 
 // HelloWorld Layer
-@interface HelloWorld : CCLayer
+@interface HelloWorld : CCLayer <ZTWebSocketDelegate>
 {
+	ZTWebSocket* webSocket;
 	b2World* world;
 	GLESDebugDraw *m_debugDraw;
 }

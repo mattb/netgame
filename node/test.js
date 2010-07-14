@@ -9,11 +9,11 @@ var i = 0;
 setInterval(function() {
     _.each(sockets, function(websocket) {
         if(websocket.readyState != 'closed') {
-            websocket.write("WTF? " + i);
+            //websocket.write(((i%20) * 50) + ' 500');
             i++;
         }
     });
-},1000);
+},2500);
 
 ws.createServer(function (websocket) {
     websocket.addListener("connect", function (resource) { 
@@ -21,14 +21,19 @@ ws.createServer(function (websocket) {
         sys.debug("connect: " + resource);
         sockets.push(websocket);
 
-        // server closes connection after 10s, will also get "close" event
-        setTimeout(websocket.end, 10 * 1000); 
+        // server closes connection after 60s, will also get "close" event
+        setTimeout(websocket.end, 60 * 1000); 
     }).addListener("data", function (data) { 
         // handle incoming data
         sys.debug(data);
 
         // send data to client
-        websocket.write("Thanks!");
+        // websocket.write("Thanks!");
+        _.each(_.without(sockets,websocket), function(w) {
+            if(w.readyState != 'closed') {
+                w.write(data);
+            }
+        });
     }).addListener("close", function () { 
         // emitted when server or client closes connection
         sys.debug("close");
