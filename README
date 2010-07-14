@@ -1,0 +1,8 @@
+Experimenting with networked games protocols using cocos2d, websockets and node.js.
+
+Contains copies of code from:
+
+http://github.com/cocos2d/cocos2d-iphone
+http://github.com/ncr/node.ws.js
+http://github.com/documentcloud/underscore
+http://github.com/esad/zimt
