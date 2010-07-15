@@ -1,6 +1,7 @@
 var sys = require("sys"),
 ws = require("./ws");
 require("./underscore");
+require("./date");
 
 var sockets = [];
 
@@ -25,10 +26,12 @@ ws.createServer(function (websocket) {
         setTimeout(websocket.end, 60 * 1000); 
     }).addListener("data", function (data) { 
         // handle incoming data
-        sys.debug(data);
+        var parsed = JSON.parse(data);
+        sys.debug(new Date().getTime()-Date.parse(parsed.when).getTime());
 
         // send data to client
         // websocket.write("Thanks!");
+
         _.each(_.without(sockets,websocket), function(w) {
             if(w.readyState != 'closed') {
                 w.write(data);
@@ -39,4 +42,4 @@ ws.createServer(function (websocket) {
         sys.debug("close");
         sockets = _.without(sockets,websocket);
     });
-}).listen(8080);
+}).listen(9990);

@@ -217,7 +217,14 @@ enum {
 	//Add a new body/atlas sprite at the touched location
 	for( UITouch *touch in touches ) {
 		CGPoint location = [touch locationInView: [touch view]];
-		[webSocket send:[NSString stringWithFormat:@"%d %d", (int)location.x,(int)location.y]];
+		
+		NSDate *now = [NSDate date];
+		NSDateFormatter* dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+		[dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
+		NSString *dateString = [dateFormatter stringFromDate:now];
+		
+		NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithInt:(int)location.x], @"x", [NSNumber numberWithInt:(int)location.y], @"y", dateString, @"when", nil];
+		[webSocket send:[data JSONRepresentation]];
 		
 		location = [[CCDirector sharedDirector] convertToGL: location];
 		
@@ -247,7 +254,7 @@ enum {
 
 -(void)webSocketDidOpen:(ZTWebSocket *)aWebSocket {
 	NSLog(@"Connected");
-	[aWebSocket send:@"O HAI"];
+	// [aWebSocket send:@"O HAI"];
 }
 -(void)webSocketDidClose:(ZTWebSocket *)aWebSocket {
     NSLog(@"Closed");
@@ -257,10 +264,10 @@ enum {
 }
 -(void)webSocket:(ZTWebSocket *)webSocket didReceiveMessage:(NSString*)message {
     NSLog(@"%@", message);
-	NSArray *coords = [message componentsSeparatedByString:@" "];
+	NSDictionary *data = (NSDictionary *)[message JSONValue];
 	
-	long x = [[coords objectAtIndex:0] longLongValue];
-	long y = [[coords objectAtIndex:1] longLongValue];
+	long x = [[data objectForKey:@"x"] longLongValue];
+	long y = [[data objectForKey:@"y"] longLongValue];
 	CGPoint location = CGPointMake(x,y);
 	
 	location = [[CCDirector sharedDirector] convertToGL: location];
